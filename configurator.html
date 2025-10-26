@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <title>Colitex - Royal Muselet</title>
+
+
+  <!-- Load Tailwind CSS --><script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com" rel="preconnect">
+  <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
+  <!-- Lade die Schriften, die von BEIDEN Seiten benötigt werden -->
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Inter:wght@400;500;700&family=Playfair+Display:wght@400;700&family=Merriweather:wght@400;700&display=swap" rel="stylesheet">
+
+
+
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com" rel="preconnect">
+  <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&family=Roboto+Slab:wght@100;200;300;400;500;600;700;800;900&family=Source+Serif+Pro:ital,wght@0,200;0,300;0,400;0,600;0,700;0,900;1,200;1,300;1,400;1,600;1,700;1,900&display=swap" rel="stylesheet">
+
+  <!-- Vendor CSS Files -->
+  <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <link href="assets/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
+
+
+  <!-- Main CSS File -->
+  <link href="assets/css/main.css" rel="stylesheet">
+  <!-- Colitex Configurator Styles -->
+  <style>
+    /* Define custom fonts and base styles */
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #3b202f; /* Deep maroon/purple from brand guide */
+      color: #e0c9d6;
+    }
+
+    .font-brand {
+      font-family: 'Cormorant Garamond', serif;
+    }
+
+    .font-playfair {
+      font-family: 'Playfair Display', serif;
+    }
+
+    .font-merriweather {
+      font-family: 'Merriweather', serif;
+    }
+
+    /* Custom styles for the cap preview */
+    .muselet-preview-container {
+      position: relative;
+      width: 300px; /* Resized for new wire design */
+      height: 300px;
+      margin: 2rem auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* The main cap (plaque) that changes */
+    #cap-preview {
+      width: 250px;
+      height: 250px;
+      border-radius: 50%;
+      position: absolute; /* Positioned to be under the wires */
+      display: flex;
+      flex-direction: column; /* For multiple lines of text/logo */
+      align-items: center;
+      justify-content: center;
+      color: white;
+      transition: background 0.3s ease;
+      border: 3px solid rgba(255, 255, 255, 0.2);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      overflow: hidden;
+      z-index: 10; /* Cap should be behind wires for the visual effect */
+    }
+
+    /* Static brand text on the cap */
+    .colitex-brand-text {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 14px;
+      font-weight: 600;
+      line-height: 1;
+      margin-top: 5px; /* Adjust spacing from logo */
+      color: inherit; /* Inherit from capLogoColor */
+    }
+    .royal-muselet-text {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 10px;
+      line-height: 1;
+      margin-top: 2px;
+      color: inherit; /* Inherit from capLogoColor */
+    }
+
+    /* Cap Logo Container (for image or text) */
+    #cap-logo-container {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 80px; /* Size of the 'C' logo in the reference */
+      height: 80px;
+      overflow: hidden;
+      /* Default text styles */
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 80px;
+      font-weight: 600;
+      color: inherit; /* Will be set by JS */
+      text-align: center;
+      line-height: 1;
+      margin-bottom: 5px;
+    }
+
+    #cap-logo-container img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain; /* Ensures the image fits without cropping */
+      display: none; /* Hidden by default, shown if image is uploaded */
+    }
+
+    /* Material Styles */
+    #cap-preview.glossy {
+      background-image: radial-gradient(circle at 30% 30%,
+      rgba(255, 255, 255, 0.8),
+      rgba(255, 255, 255, 0.2) 30%,
+      rgba(255, 255, 255, 0) 70%
+      );
+    }
+
+    #cap-preview.matte {
+      background-image: none;
+    }
+
+    /* Custom styled radio buttons for material */
+    .material-selector input[type="radio"] {
+      display: none;
+    }
+
+    .material-selector label {
+      cursor: pointer;
+      padding: 0.5rem 1.5rem;
+      border-radius: 9999px;
+      border: 2px solid #6f4a5f;
+      color: #e0c9d6;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+
+    .material-selector input[type="radio"]:checked + label {
+      background-color: #e0c9d6;
+      color: #3b202f;
+      border-color: #e0c9d6;
+      font-weight: 600;
+    }
+
+    /* Color swatches */
+    .color-swatch {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      cursor: pointer;
+      border: 3px solid transparent;
+      transition: all 0.2s ease;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+      background-size: cover; /* For metallic gradients */
+      background-position: center;
+    }
+
+    .color-swatch:hover {
+      transform: scale(1.1);
+    }
+
+    .color-swatch.active {
+      border-color: #ffffff;
+      box-shadow: 0 0 15px rgba(255, 255, 255, 0.7);
+    }
+
+    /* --- CORRECTED WIRE DESIGN (CIRCLES + LINES) --- */
+    .muselet-wire-group {
+      position: relative;
+      width: 300px; /* Outer circle diameter */
+      height: 300px;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 20;
+
+    }
+
+    .wire-piece {
+      position: absolute;
+      box-shadow: 0 0 8px rgba(0,0,0,0.5);
+    }
+
+    /* * KORREKTUR: Verwendet background + mask anstelle von border-image.
+     * Das funktioniert zuverlässig mit border-radius.
+    */
+    .wire-circle {
+      box-sizing: border-box;
+      border-radius: 50%; /* Behält die Kreisform bei */
+
+      /* 1. Setze die Randbreite. Die Farbe ist unwichtig, da wir maskieren. */
+      border: 6px solid transparent;
+
+      /* 2. Wende den Verlauf als Hintergrund an */
+      background: var(--wire-gradient);
+
+      /* 3. Maskiere den Hintergrund, um nur den Rand anzuzeigen */
+      /* Dies erstellt eine "Maske" für den Inhaltsbereich und zieht sie von einer Maske für das gesamte Element ab */
+      -webkit-mask:
+              linear-gradient(#fff 0 0) content-box, /* Maskiert das Innere (content) */
+              linear-gradient(#fff 0 0); /* Maskiert das Äußere (border + padding + content) */
+      -webkit-mask-composite: xor; /* Stanzt das Innere aus (für ältere Browser) */
+      mask:
+              linear-gradient(#fff 0 0) content-box, /* Standard-Syntax: Innere Maske */
+              linear-gradient(#fff 0 0); /* Standard-Syntax: Äußere Maske */
+      mask-composite: exclude; /* Standard-Syntax: Stanzt das Innere aus */
+    }
+
+
+    .wire-circle.outer {
+      width: 300px;
+      height: 300px;
+      top: 0;
+      left: 0;
+    }
+
+    .wire-circle.inner {
+      width: 230px; /* Slightly smaller than cap */
+      height: 230px;
+      top: 35px; /* (300 - 230) / 2 */
+      left: 35px;
+      z-index: 22; /* Above connecting lines */
+    }
+
+    .wire-line {
+      /* Use background gradient for solid lines */
+      background: var(--wire-gradient);
+      z-index: 21; /* Below inner circle */
+      border-radius: 3px; /* This will round the corners */
+    }
+
+    /* Vertical lines */
+    .wire-line.l1 {
+      width: 6px;
+      height: 35px; /* (300 - 230) / 2 */
+      top: 0;
+      left: 147px; /* (300 - 6) / 2 */
+    }
+    .wire-line.l2 {
+      width: 6px;
+      height: 35px;
+      bottom: 0;
+      left: 147px;
+    }
+
+    /* Horizontal lines */
+    .wire-line.l3 {
+      width: 35px;
+      height: 6px;
+      top: 147px; /* (300 - 6) / 2 */
+      left: 0;
+    }
+    .wire-line.l4 {
+      width: 35px;
+      height: 6px;
+      top: 147px;
+      right: 0;
+    }
+
+    /* HIDE OLD/BROKEN WIRE STYLES (IMPORTANT) */
+    .muselet-wire,
+    .muselet-wire-group::before,
+    .muselet-wire-group::after,
+    .wire-copper, .wire-silver, .wire-gold, .wire-black, .wire-rose-gold, .wire-white,
+    .wire-foot, .wire-arm, .wire-top-loop, .wire-bottom-twist {
+      display: none !important;
+      background: none !important;
+      border: none !important;
+    }
+
+    /* Eigene Stile für Header/Footer, um Bootstrap zu ersetzen */
+    .dark-background {
+      background-color: #3b202f;
+      color: #e0c9d6;
+    }
+    .topbar {
+      background-color: rgba(0,0,0,0.2);
+      font-size: 0.875rem; /* text-sm */
+      padding: 0.5rem 0;
+    }
+    .topbar a {
+      color: #e0c9d6;
+      transition: color 0.3s;
+    }
+    .topbar a:hover {
+      color: #ffffff;
+    }
+    .branding {
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+    .navmenu ul {
+      display: flex;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .navmenu li {
+      margin-left: 1.5rem; /* ml-6 */
+    }
+    .navmenu a {
+      color: #e0c9d6;
+      font-weight: 500;
+      transition: color 0.3s;
+      padding: 1.5rem 0;
+      display: block;
+    }
+    .navmenu a:hover, .navmenu .active {
+      color: #ffffff;
+    }
+    .mobile-nav-toggle {
+      display: none; /* Für dieses Beispiel vereinfacht */
+    }
+
+    /* Footer Stile */
+    .footer {
+      padding: 4rem 0;
+      border-top: 1px solid rgba(255,255,255,0.1);
+    }
+    .footer-links h4 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.5rem; /* text-2xl */
+      font-weight: 600;
+      margin-bottom: 1rem;
+      color: #ffffff;
+    }
+    .footer-links ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    .footer-links li {
+      margin-bottom: 0.5rem;
+    }
+    .footer-links a {
+      color: #e0c9d6;
+      transition: color 0.3s;
+    }
+    .footer-links a:hover {
+      color: #ffffff;
+    }
+    .footer-contact p {
+      margin-bottom: 0.5rem;
+    }
+    .footer-bottom {
+      padding: 1.5rem 0;
+      margin-top: 2rem;
+      background-color: rgba(0,0,0,0.2);
+      font-size: 0.875rem;
+    }
+
+  </style>
+</head>
+
+<body class="dark-background">
+
+<header id="header" class="header fixed-top">
+
+  <div class="topbar d-flex align-items-center dark-background">
+    <div class="container d-flex justify-content-center justify-content-md-between">
+      <div class="contact-info d-flex align-items-center">
+        <i class="bi bi-envelope d-flex align-items-center"><a href="mailto:lilian_cheban@colitex.md">lilian_cheban@colitex.md</a></i>
+        <i class="bi bi-phone d-flex align-items-center ms-4"><span>069140069</span></i>
+      </div>
+      <div class="social-links d-none d-md-flex align-items-center">
+        <a href="#" class="twitter"><i class="bi bi-twitter-x"></i></a>
+        <a href="#" class="facebook"><i class="bi bi-facebook"></i></a>
+        <a href="#" class="instagram"><i class="bi bi-instagram"></i></a>
+        <a href="#" class="linkedin"><i class="bi bi-linkedin"></i></a>
+      </div>
+    </div>
+  </div><div class="branding d-flex align-items-cente">
+
+  <div class="container position-relative d-flex align-items-center justify-content-between">
+    <a href="index.html" class="logo d-flex align-items-center">
+      <h1 class="sitename">Colitex</h1>
+    </a>
+
+    <nav id="navmenu" class="navmenu">
+      <ul>
+        <li><a href="index.html" class="active">Home</a></li>
+        <li><a href="#">Configurator</a></li>
+
+      </ul>
+      <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
+    </nav>
+
+  </div>
+
+</div>
+
+</header>
+
+
+<main class="main pt-32"> <!-- Padding-top hinzugefügt, um Platz für den fixed Header zu schaffen -->
+
+  <!-- Page Title (angepasst für Colitex) -->
+  <div class="page-title text-center py-12" data-aos="fade">
+    <div class="container position-relative">
+      <h1 class="font-brand text-6xl font-semibold text-white">Royal Muselet Configurator</h1>
+      <p class="font-brand text-2xl text-gray-300 opacity-80 mt-2">Design your custom muselet</p>
+    </div>
+  </div><!-- End Page Title -->
+
+
+  <!-- Configurator Section -->
+  <section id="configurator" class="configurator-section section">
+    <div class="container mx-auto max-w-6xl p-6 lg:p-12">
+
+      <!-- Main Content: Configurator (von configurator.html) -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
+
+        <!-- Left Column: Preview -->
+        <div class="flex items-center justify-center pt-8 lg:sticky top-32"> <!-- Sticky für die Vorschau -->
+          <div class="muselet-preview-container">
+            <!-- The Cap -->
+            <div id="cap-preview" class="glossy" style="background-color: #3b202f;">
+              <!-- Cap Logo/Text -->
+              <div id="cap-logo-container" style="color: #e0c9d6;">
+                <img id="uploaded-logo-img" src="" alt="Custom Logo" class="hidden">
+                <span id="cap-logo-text">C</span>
+              </div>
+              <p class="colitex-brand-text" style="color: #e0c9d6;">colitex</p>
+              <p class="royal-muselet-text" style="color: #e0c9d6;">royal muselet</p>
+            </div>
+
+            <!-- Correct Wireframe (Circles + Lines) -->
+            <div class="muselet-wire-group" id="muselet-wire-group">
+              <div class="wire-piece wire-circle outer"></div>
+              <div class="wire-piece wire-circle inner"></div>
+              <div class="wire-piece wire-line l1"></div>
+              <div class="wire-piece wire-line l2"></div>
+              <div class="wire-piece wire-line l3"></div>
+              <div class="wire-piece wire-line l4"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Column: Controls -->
+        <div class=" bg-opacity-20 p-8 rounded-2xl shadow-lg">
+
+          <!-- 1. Cap Material Selector -->
+          <section class="mb-8">
+            <h2 class="font-brand text-3xl font-semibold mb-4 text-white">Cap Material</h2>
+            <div class="flex space-x-4 material-selector">
+              <div>
+                <input type="radio" id="mat-glossy" name="cap-material" value="glossy" checked>
+                <label for="mat-glossy">Glossy Metal</label>
+              </div>
+              <div>
+                <input type="radio" id="mat-matte" name="cap-material" value="matte">
+                <label for="mat-matte">Matte Finish</label>
+              </div>
+            </div>
+          </section>
+
+          <!-- 2. Cap Color Selector -->
+          <section class="mb-8">
+            <h2 class="font-brand text-3xl font-semibold mb-4 text-white">Cap Color</h2>
+            <div id="cap-color-selector" class="grid grid-cols-4 sm:grid-cols-6 gap-3">
+              <!-- Richer Color Palette -->
+              <div class="color-swatch active" data-color="#3b202f" data-logo-color="#e0c9d6" style="background-color: #3b202f;"></div>
+              <div class="color-swatch" data-color="#1a1a1a" data-logo-color="#FFFFFF" style="background-color: #1a1a1a;"></div>
+              <div class="color-swatch" data-color="#FFFFFF" data-logo-color="#3b202f" style="background-color: #FFFFFF;"></div>
+              <div class="color-swatch" data-color="#D4AF37" data-logo-color="#1a1a1a" style="background: linear-gradient(145deg, #FFD700, #B8860B);"></div>
+              <div class="color-swatch" data-color="#C0C0C0" data-logo-color="#1a1a1a" style="background: linear-gradient(145deg, #E0E0E0, #A0A0A0);"></div>
+              <div class="color-swatch" data-color="#B76E79" data-logo-color="#FFFFFF" style="background: linear-gradient(145deg, #FADADD, #B76E79);"></div>
+              <div class="color-swatch" data-color="#6F0000" data-logo-color="#FFE0E0" style="background-color: #6F0000;"></div>
+              <div class="color-swatch" data-color="#003366" data-logo-color="#CCCCFF" style="background-color: #003366;"></div>
+              <div class="color-swatch" data-color="#004d00" data-logo-color="#CCFFCC" style="background-color: #004d00;"></div>
+              <div class="color-swatch" data-color="#800080" data-logo-color="#FFCCFF" style="background-color: #800080;"></div>
+              <div class="color-swatch" data-color="#5C4033" data-logo-color="#EADDCA" style="background-color: #5C4033;"></div>
+              <div class="color-swatch" data-color="#000080" data-logo-color="#C0C0E0" style="background-color: #000080;"></div>
+            </div>
+          </section>
+
+          <!-- 3. Wire Color Selector -->
+          <section class="mb-8">
+            <h2 class="font-brand text-3xl font-semibold mb-4 text-white">Wire Color</h2>
+            <div id="wire-color-selector" class="grid grid-cols-4 sm:grid-cols-6 gap-3">
+              <div class="color-swatch active" data-wire-color="copper" style="background: linear-gradient(145deg, #e6a76a, #B87333); border-color: #e6a76a;"></div>
+              <div class="color-swatch" data-wire-color="silver" style="background: linear-gradient(145deg, #E0E0E0, #A0A0A0); border-color: #E0E0E0;"></div>
+              <div class="color-swatch" data-wire-color="gold" style="background: linear-gradient(145deg, #FFE580, #DAA520, #B8860B); border-color: #FFE580;"></div>
+              <div class="color-swatch" data-wire-color="black" style="background: linear-gradient(145deg, #404040, #101010); border-color: #404040;"></div>
+              <div class="color-swatch" data-wire-color="rose-gold" style="background: linear-gradient(145deg, #FADADD, #B76E79); border-color: #FADADD;"></div>
+              <div class="color-swatch" data-wire-color="white" style="background: linear-gradient(145deg, #FFFFFF, #E0E0E0); border-color: #FFFFFF;"></div>
+            </div>
+          </section>
+
+          <!-- 4. Cap Logo Customization -->
+          <section class="mb-8">
+            <h2 class="font-brand text-3xl font-semibold mb-4 text-white">Cap Logo</h2>
+
+            <div class="mb-4">
+              <input type="radio" id="logo-type-text" name="logo-type" value="text" class="mr-2" checked>
+              <label for="logo-type-text" class="mr-6">Custom Text</label>
+              <input type="radio" id="logo-type-image" name="logo-type" value="image" class="mr-2">
+              <label for="logo-type-image">Upload Image</label>
+            </div>
+
+            <!-- Text Editor Options -->
+            <div id="text-logo-options">
+              <input id="cap-text-input" type="text" class="w-full p-3 mt-2 rounded-lg bg-white bg-opacity-10 border border-gray-600 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-white" placeholder="C">
+
+              <div class="flex items-center space-x-4 mt-4">
+                <label for="font-selector" class="block text-gray-300">Font:</label>
+                <select id="font-selector" class="p-2 rounded-lg bg-white bg-opacity-10 border border-gray-600 text-white focus:outline-none focus:ring-2 focus:ring-white">
+                  <option value="Cormorant Garamond" class="font-brand">Cormorant Garamond</option>
+                  <option value="Playfair Display" class="font-playfair">Playfair Display</option>
+                  <option value="Merriweather" class="font-merriweather">Merriweather</option>
+                  <option value="Inter" class="font-inter">Inter (Default)</option>
+                </select>
+
+                <label for="logo-text-color-picker" class="block text-gray-300 ml-4">Color:</label>
+                <input type="color" id="logo-text-color-picker" value="#e0c9d6" class="w-8 h-8 rounded-full border-none cursor-pointer">
+              </div>
+            </div>
+
+            <!-- Image Upload Option -->
+            <div id="image-logo-options" class="hidden">
+              <input type="file" id="logo-image-upload" accept="image/*" class="w-full p-3 mt-2 rounded-lg bg-white bg-opacity-10 border border-gray-600 text-white focus:outline-none focus:ring-2 focus:ring-white">
+              <p class="text-xs text-gray-400 mt-2">Upload a transparent PNG for best results.</p>
+            </div>
+          </section>
+
+        </div>
+      </div><!-- Ende Configurator Grid -->
+
+    </div>
+  </section><!-- /Configurator Section -->
+
+</main>
+
+<footer id="footer" class="footer dark-background">
+
+  <div class="container mx-auto max-w-6xl p-4">
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+
+      <div class="col-span-1 md:col-span-2">
+        <div class="footer-content">
+          <a href="index.html" class="logo d-flex align-items-center mb-4">
+            <span class="font-brand text-4xl text-white">colitex</span>
+          </a>
+          <p class="mb-4 text-gray-400">
+            Specialists in high-quality muselets for sparkling wines and champagne. Customize your unique Royal Muselet with our configurator.
+          </p>
+        </div>
+      </div>
+
+      <div class="col-span-1">
+        <div class="footer-links">
+          <h4>Our Products</h4>
+          <ul>
+            <li><a href="#">Royal Muselet</a></li>
+            <li><a href="#">Custom Plaques</a></li>
+            <li><a href="#">Wire Cages</a></li>
+            <li><a href="#">Bulk Orders</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="col-span-1">
+        <div class="footer-contact">
+          <h4>Get in Touch</h4>
+          <p class="text-gray-400">
+            Lilian Cheban<br>
+            Director<br>
+          </p>
+          <p class="mt-4"><strong>Phone:</strong> <span>069140069</span></p>
+          <p><strong>Email:</strong> <span>lilian_cheban@colitex.md</span></p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="footer-bottom">
+    <div class="container mx-auto max-w-6xl p-4 flex flex-col md:flex-row justify-between items-center text-gray-500">
+      <div class="copyright">
+        <p>© <span>Copyright</span> <strong class="px-1 text-white">colitex</strong> <span>All Rights Reserved</span></p>
+      </div>
+      <div class="credits mt-2 md:mt-0">
+        <!-- Credits können beibehalten oder entfernt werden -->
+        Designed by <a href="https://bootstrapmade.com/" class="text-gray-400 hover:text-white">BootstrapMade</a> (Theme)
+      </div>
+    </div>
+  </div>
+
+</footer>
+
+<!-- Scroll Top (optional, aber aus der Vorlage übernommen) -->
+<!-- <a href="#" id="scroll-top" class="scroll-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a> -->
+
+<!-- Preloader (optional, aber aus der Vorlage übernommen) -->
+<!-- <div id="preloader"></div> -->
+
+<!-- Configurator JavaScript -->
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    // Get elements
+    const capPreview = document.getElementById('cap-preview');
+    const capLogoContainer = document.getElementById('cap-logo-container');
+    const uploadedLogoImg = document.getElementById('uploaded-logo-img');
+    const capLogoText = document.getElementById('cap-logo-text');
+    const colitexBrandText = document.querySelector('.colitex-brand-text');
+    const royalMuseletText = document.querySelector('.royal-muselet-text');
+
+    const capMaterialRadios = document.querySelectorAll('input[name="cap-material"]');
+    const capColorSwatches = document.querySelectorAll('#cap-color-selector .color-swatch');
+    const wireColorSwatches = document.querySelectorAll('#wire-color-selector .color-swatch');
+    const museletWireGroup = document.getElementById('muselet-wire-group');
+
+    const logoTypeRadios = document.querySelectorAll('input[name="logo-type"]');
+    const textLogoOptions = document.getElementById('text-logo-options');
+    const imageLogoOptions = document.getElementById('image-logo-options');
+    const capTextInput = document.getElementById('cap-text-input');
+    const fontSelector = document.getElementById('font-selector');
+    const logoTextColorPicker = document.getElementById('logo-text-color-picker');
+    const logoImageUpload = document.getElementById('logo-image-upload');
+
+    // Default configuration
+    let config = {
+      capMaterial: 'glossy',
+      capColor: '#3b202f',
+      capLogoColor: '#e0c9d6',
+      wireColor: 'copper', // Store the key, not the class
+      logoType: 'text',
+      logoText: 'C',
+      logoFont: 'Cormorant Garamond',
+      logoTextColor: '#e0c9d6',
+      logoImage: ''
+    };
+
+    const wireColorMap = {
+      'copper': 'linear-gradient(145deg, #e6a76a, #B87333)',
+      'silver': 'linear-gradient(145deg, #F0F0F0, #A0A0A0)',
+      'gold': 'linear-gradient(145deg, #FFE580, #DAA520, #B8860B)',
+      'black': 'linear-gradient(145deg, #505050, #101010)',
+      'rose-gold': 'linear-gradient(145deg, #FADADD, #B76E79)',
+      'white': 'linear-gradient(145deg, #FFFFFF, #E0E0E0)'
+    };
+
+    // This map is no longer used in this design, but kept for reference
+    const wireTwistedColorMap = {
+      'copper': 'repeating-linear-gradient(45deg, #B87333, #e6a76a 10px, #B87333 20px)',
+      'silver': 'repeating-linear-gradient(45deg, #A0A0A0, #F0F0F0 10px, #A0A0A0 20px)',
+      'gold': 'repeating-linear-gradient(45deg, #B8860B, #FFE580 10px, #B8860B 20px)',
+      'black': 'repeating-linear-gradient(45deg, #101010, #505050 10px, #101010 20px)',
+      'rose-gold': 'repeating-linear-gradient(45deg, #B76E79, #FADADD 10px, #B76E79 20px)',
+      'white': 'repeating-linear-gradient(45deg, #E0E0E0, #FFFFFF 10px, #E0E0E0 20px)'
+    };
+
+
+    function updateCapPreview() {
+      // 1. Update Cap Material
+      capPreview.classList.toggle('glossy', config.capMaterial === 'glossy');
+      capPreview.classList.toggle('matte', config.capMaterial === 'matte');
+
+      // 2. Update Cap Color
+      if (config.capMaterial === 'glossy') {
+        const activeSwatch = document.querySelector(`#cap-color-selector .color-swatch.active`);
+        if (activeSwatch && activeSwatch.style.background.includes('gradient')) {
+          // Handle metallic cap colors
+          capPreview.style.backgroundImage = 'none'; // Clear glossy shine first
+          capPreview.style.background = activeSwatch.style.background;
+
+          // Re-apply a subtle shine on top of the metallic gradient
+          capPreview.style.background = `radial-gradient(circle at 30% 30%,
+                            rgba(255, 255, 255, 0.4),
+                            rgba(255, 255, 255, 0.1) 35%,
+                            rgba(255, 255, 255, 0) 70%
+                        ), ${activeSwatch.style.background}`;
+
+        } else {
+          // Handle flat cap colors
+          capPreview.style.background = config.capColor; // Set base color
+          capPreview.style.backgroundImage = `radial-gradient(circle at 30% 30%,
+                            rgba(255, 255, 255, 0.7),
+                            rgba(255, 255, 255, 0.1) 35%,
+                            rgba(255, 255, 255, 0) 70%
+                        )`;
+        }
+      } else {
+        // Handle matte finish
+        const activeSwatch = document.querySelector(`#cap-color-selector .color-swatch.active`);
+        if (activeSwatch && activeSwatch.style.background.includes('gradient')) {
+          // Matte metallic
+          capPreview.style.backgroundImage = 'none';
+          capPreview.style.background = activeSwatch.style.background;
+        } else {
+          // Matte flat
+          capPreview.style.backgroundImage = 'none';
+          capPreview.style.background = config.capColor; // Matte is just flat color
+        }
+      }
+
+      // 3. Update Logo Content (Text or Image)
+      if (config.logoType === 'text') {
+        uploadedLogoImg.classList.add('hidden');
+        capLogoText.classList.remove('hidden');
+        capLogoText.textContent = config.logoText;
+        capLogoText.style.fontFamily = config.logoFont;
+        capLogoText.style.color = config.logoTextColor;
+        colitexBrandText.style.color = config.logoTextColor;
+        royalMuseletText.style.color = config.logoTextColor;
+      } else { // Image
+        capLogoText.classList.add('hidden');
+        if (config.logoImage) {
+          uploadedLogoImg.src = config.logoImage;
+          uploadedLogoImg.classList.remove('hidden');
+        }
+        colitexBrandText.style.color = config.capLogoColor; // Fallback to cap's suggested logo color
+        royalMuseletText.style.color = config.capLogoColor;
+      }
+    }
+
+    function updateWirePreview() {
+      const wireGradient = wireColorMap[config.wireColor];
+
+      if (!wireGradient) {
+        console.error("Invalid wire color selected:", config.wireColor);
+        return;
+      }
+
+      // Set custom properties on the main group
+      museletWireGroup.style.setProperty('--wire-gradient', wireGradient);
+    }
+
+
+    // --- Event Listeners ---
+
+    // Cap Material
+    capMaterialRadios.forEach(radio => {
+      radio.addEventListener('change', (e) => {
+        config.capMaterial = e.target.value;
+        updateCapPreview();
+      });
+    });
+
+    // Cap Color
+    capColorSwatches.forEach(swatch => {
+      swatch.addEventListener('click', () => {
+        document.querySelector('#cap-color-selector .color-swatch.active').classList.remove('active');
+        swatch.classList.add('active');
+
+        config.capColor = swatch.dataset.color;
+        config.capLogoColor = swatch.dataset.logoColor; // Update suggested logo color
+        // If logo type is text, update its color to the suggested one
+        if (config.logoType === 'text') {
+          logoTextColorPicker.value = config.capLogoColor;
+          config.logoTextColor = config.capLogoColor; // Update config directly too
+        }
+        updateCapPreview();
+      });
+    });
+
+    // Wire Color
+    wireColorSwatches.forEach(swatch => {
+      swatch.addEventListener('click', () => {
+        // Update active state
+        const currentActive = document.querySelector('#wire-color-selector .color-swatch.active');
+        if(currentActive) currentActive.classList.remove('active');
+        swatch.classList.add('active');
+
+        config.wireColor = swatch.dataset.wireColor; // Change from wireColorClass
+        updateWirePreview();
+      });
+    });
+
+    // Logo Type (Text vs. Image)
+    logoTypeRadios.forEach(radio => {
+      radio.addEventListener('change', (e) => {
+        config.logoType = e.target.value;
+        if (config.logoType === 'text') {
+          textLogoOptions.classList.remove('hidden');
+          imageLogoOptions.classList.add('hidden');
+        } else {
+          textLogoOptions.classList.add('hidden');
+          imageLogoOptions.classList.remove('hidden');
+        }
+        updateCapPreview();
+      });
+    });
+
+    // Cap Text Input
+    capTextInput.addEventListener('input', (e) => {
+      config.logoText = e.target.value || 'C'; // Default to 'C' if empty
+      updateCapPreview();
+    });
+
+    // Font Selector
+    fontSelector.addEventListener('change', (e) => {
+      config.logoFont = e.target.value;
+      updateCapPreview();
+    });
+
+    // Logo Text Color Picker
+    logoTextColorPicker.addEventListener('input', (e) => {
+      config.logoTextColor = e.target.value;
+      updateCapPreview();
+    });
+
+    // Logo Image Upload
+    logoImageUpload.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          config.logoImage = event.target.result;
+          config.logoType = 'image'; // Switch to image mode automatically
+          document.getElementById('logo-type-image').checked = true;
+          textLogoOptions.classList.add('hidden');
+          imageLogoOptions.classList.remove('hidden');
+          updateCapPreview();
+        };
+        reader.readAsDataURL(file);
+      } else {
+        config.logoImage = '';
+        updateCapPreview();
+      }
+    });
+
+    // Initial render calls
+    updateCapPreview();
+    updateWirePreview();
+  });
+</script>
+
+</body>
+
+</html>
